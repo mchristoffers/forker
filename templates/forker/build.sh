@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Build this fork. Generated per project by the create-or-repair-build skill.
+# Build this fork. Written per project by the create-or-repair-build skill.
 #
 # Contract:
-#   - runs non-interactively from any directory
-#   - installs/uses whatever toolchain the project needs
-#   - writes the release artifacts (and only those) into forker/dist/
-#   - exits non-zero on failure
+#   - non-interactive and idempotent: starts with rm -rf forker/dist && mkdir -p forker/dist
+#   - mirrors the project's own build (its CI release job); checks required tools up front
+#   - writes only the release artifacts into forker/dist/ (flat names, they become release assets)
+#   - never edits upstream files, so `make update` merges stay conflict-free
+#   - one comment line naming where the commands came from
 set -euo pipefail
 cd "$(dirname "$0")/.."
 source forker/config
