@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "forker",
   "displayName": "forker",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Fork a GitHub repo with gh and add a generic build/publish/update layer; skills set up the fork and create or repair the project-specific build script.",
   "author": {
     "name": "Moritz Christoffers"

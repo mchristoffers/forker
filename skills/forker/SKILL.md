@@ -1,6 +1,7 @@
 ---
 name: forker
 description: Fork a GitHub repo with forker (build/publish/update layer), then create its build script.
+disable-model-invocation: true
 ---
 
 # forker
