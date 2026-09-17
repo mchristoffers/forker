@@ -1,11 +1,19 @@
 {
   "name": "forker",
   "version": "0.1.0",
+  "private": true,
   "description": "Fork a repo with gh and add a build/publish/update layer on top",
   "type": "module",
-  "bin": { "forker": "dist/cli.js" },
-  "files": ["dist", "templates"],
-  "engines": { "node": ">=20" },
+  "bin": {
+    "forker": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc",
     "prepare": "tsc"
