@@ -13,21 +13,18 @@ npm install -g https://codeload.github.com/mchristoffers/forker/tar.gz/main   # 
 
 ### Plugin / skill (Claude Code + Codex)
 
-This repo is a plugin in the `mchristoffers` marketplace (`mchristoffers/claude-marketplace`).
-It's published in two formats that share `skills/`: `.claude-plugin/plugin.json` (Claude Code) and
-root `plugin.json` ([Agent Plugins](https://agent-plugins.org)).
-
-User-level install from a checkout (copies, no symlinks):
+forker is a plugin in the `mchristoffers` marketplace ([mchristoffers/claude-marketplace](https://github.com/mchristoffers/claude-marketplace)):
 
 ```sh
-rm -rf ~/.claude/skills/forker && mkdir -p ~/.claude/skills/forker
-rsync -a --exclude='.git' --exclude='node_modules' --exclude='dist' . ~/.claude/skills/forker/   # Claude Code
-npx skills add . --skill forker --global --agent codex --copy --yes                              # Codex
+claude plugin marketplace add mchristoffers/claude-marketplace && claude plugin install forker@mchristoffers --scope user
+codex plugin marketplace add mchristoffers/claude-marketplace && codex plugin add forker@mchristoffers
 ```
 
-Rerun after changing the skill, and bump `version` in both manifests.
-`dist/` is committed, so installing from GitHub needs no build: run `npm run build` before committing changes to `src/`.
-Then ask your agent: *"set up a fork of owner/repo with forker"*.
+It's published in two formats that share `skills/`: root `plugin.json` ([Agent Plugins](https://agent-plugins.org), read by Codex) and
+`.claude-plugin/plugin.json` (Claude Code). When you change the skill, bump `version` in both manifests so installs pick up the change.
+`dist/` is committed, so installing the CLI from GitHub needs no build step. Run `npm run build` before committing changes to `src/`.
+
+Then ask your agent: *"set up a fork of owner/repo with forker"*. If the `forker` CLI is missing, the skill installs it.
 
 ## CLI
 
