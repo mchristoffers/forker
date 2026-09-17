@@ -8,7 +8,7 @@ The layer is the same for every repo. Only `forker/build.sh` is project-specific
 CLI (Node >= 20, plus `gh` (logged in), `git`, `make`):
 
 ```sh
-npm install -g github:mchristoffers/forker   # from the private GitHub repo; not published to npm
+npm install -g https://codeload.github.com/mchristoffers/forker/tar.gz/main   # from GitHub; not published to npm
 ```
 
 ### Plugin / skill (Claude Code + Codex)

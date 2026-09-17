@@ -27,7 +27,7 @@ Skip this step if you're already inside a fork that has `forker/config`
 
 ```sh
 gh auth status                       # must be logged in
-command -v forker || npm install -g github:mchristoffers/forker   # private GitHub repo, not on npm
+command -v forker || npm install -g https://codeload.github.com/mchristoffers/forker/tar.gz/main   # from GitHub, not on npm
 forker fork <owner/repo> [--dir <path>] [--source-branch <branch>]
 cd <path>
 ```
