@@ -5,7 +5,7 @@
 #   - build jobs mirror the project's own CI release job (one comment line naming it)
 #   - each build job uploads only release artifacts (flat files) via actions/upload-artifact,
 #     with an artifact name starting with "dist-"; they become the release assets
-#   - every build job is listed in publish.needs
+#   - every build job is listed in publish.needs; build jobs keep the read-only default permissions
 #   - never edit upstream files; forker lives in forker/ and .github/workflows/forker-*.yml
 #   - everything below "generic" stays as is
 name: forker-build
@@ -17,9 +17,9 @@ on:
         description: Release tag to create on the fork (empty = build only)
         default: ""
 
+# Build jobs run upstream code, so they only read; publish and report get write access per job.
 permissions:
-  contents: write
-  issues: write
+  contents: read
 
 jobs:
   build:
@@ -34,6 +34,8 @@ jobs:
     needs: [build]
     if: inputs.version != ''
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -44,13 +46,20 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
         run: |
-          gh release create "$VERSION" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
-            --title "$VERSION" --notes "Built by forker from $GITHUB_SHA: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          # Rerunning this job re-uploads into the existing release instead of failing.
+          if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$VERSION" dist/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$VERSION" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+              --title "$VERSION" --notes "Built by forker from $GITHUB_SHA: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi
 
   report:
     needs: [build, publish]
     if: failure()
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - env:
           GH_TOKEN: ${{ github.token }}

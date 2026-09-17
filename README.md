@@ -33,7 +33,7 @@ forker fork owner/repo [--dir path] [--source-branch branch]
 
 This forks and clones the repo, enables Actions and issues on the fork, stores your gh token as the `FORKER_TOKEN` secret, disables upstream's own workflows, then commits and pushes:
 
-- `.github/workflows/forker-build.yml`: manual (`gh workflow run forker-build.yml [-f version=v1]`). The `build` job is a stub until the skill writes it; with a `version` it creates a release on the fork with the `dist-*` artifacts. A failure opens an issue
+- `.github/workflows/forker-build.yml`: manual (`gh workflow run forker-build.yml [-f version=v1]`). The `build` job is a stub until the skill writes it and runs read-only; with a `version`, a separate `publish` job (the only one with `contents: write`) releases the `dist-*` artifacts on the fork, and a rerun re-uploads. A failure opens an issue
 - `.github/workflows/forker-update.yml`: daily and manual. Runs `forker/update.sh` (merges the latest upstream release, opens an issue on a conflict), then builds and releases `<tag>-forker`
 - `forker/update.sh`, `forker/workflows.sh` (keeps upstream workflows disabled), `forker/config`: `UPSTREAM`, `UPSTREAM_BRANCH` (source branch to follow), `FORK`, `FORK_BRANCH`
 
