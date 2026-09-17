@@ -1,4 +1,5 @@
-import { chmodSync, cpSync, existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { chmodSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { run, tryRun } from "./exec.js";
@@ -32,15 +33,25 @@ export function fork(opts) {
         run("git", ["remote", "add", "upstream", `https://github.com/${upstream}.git`], { cwd: dir });
     }
     const forkRepo = repoFromUrl(run("git", ["remote", "get-url", "origin"], { cwd: dir }));
-    // Forks have issues disabled by default; update.sh needs them for conflict reports.
+    // Forks have issues disabled by default; update and build failures are reported as issues.
     run("gh", ["repo", "edit", forkRepo, "--enable-issues"]);
+    // Builds, updates and releases run on GitHub Actions. The update workflow pushes merges that can
+    // touch upstream workflow files, which GITHUB_TOKEN may not do, so it gets the gh token (workflow scope).
+    const token = run("gh", ["auth", "token"]);
+    run("gh", ["api", "-X", "PUT", `repos/${forkRepo}/actions/permissions`, "-F", "enabled=true", "-f", "allowed_actions=all"]);
+    execFileSync("gh", ["secret", "set", "FORKER_TOKEN", "--repo", forkRepo], { input: token, stdio: ["pipe", "ignore", "inherit"] });
     console.log("writing forker layer");
     const layer = join(dir, "forker");
+    const workflows = join(dir, ".github", "workflows");
+    const workflowFiles = ["forker-build.yml", "forker-update.yml"];
     if (existsSync(layer))
         throw new Error(`${layer} already exists in the source repo`);
+    for (const name of workflowFiles) {
+        if (existsSync(join(workflows, name)))
+            throw new Error(`${join(workflows, name)} already exists in the source repo`);
+    }
     cpSync(join(TEMPLATES, "forker"), layer, { recursive: true });
-    renameSync(join(layer, "gitignore"), join(layer, ".gitignore"));
-    for (const name of ["build.sh", "publish.sh", "update.sh", "service.sh"]) {
+    for (const name of ["update.sh", "workflows.sh"]) {
         chmodSync(join(layer, name), 0o755);
     }
     const config = readFileSync(join(layer, "config"), "utf8")
@@ -49,14 +60,16 @@ export function fork(opts) {
         .replaceAll("{{UPSTREAM_BRANCH}}", sourceBranch)
         .replaceAll("{{FORK_BRANCH}}", branch);
     writeFileSync(join(layer, "config"), config);
-    // Never clobber an upstream Makefile; fall back to forker.mk (make -f forker.mk ...).
-    const makefile = existsSync(join(dir, "Makefile")) ? "forker.mk" : "Makefile";
-    cpSync(join(TEMPLATES, "Makefile"), join(dir, makefile));
-    run("git", ["add", makefile, "forker"], { cwd: dir });
-    run("git", ["commit", "-m", "Add forker layer (build, publish, update)"], { cwd: dir });
+    mkdirSync(workflows, { recursive: true });
+    cpSync(join(TEMPLATES, "workflows", "forker-build.yml"), join(workflows, "forker-build.yml"));
+    // Spread forks over the day instead of all hitting the top of the hour.
+    const cron = `${Math.floor(Math.random() * 60)} ${Math.floor(Math.random() * 24)} * * *`;
+    writeFileSync(join(workflows, "forker-update.yml"), readFileSync(join(TEMPLATES, "workflows", "forker-update.yml"), "utf8").replaceAll("{{CRON}}", cron));
+    // Upstream CI is turned off before the push can trigger it; forker-update.yml repeats this after each merge.
+    run("bash", ["forker/workflows.sh", "disable-upstream"], { cwd: dir, inherit: true });
+    run("git", ["add", "forker", ...workflowFiles.map((name) => join(".github", "workflows", name))], { cwd: dir });
+    run("git", ["commit", "-m", "Add forker layer (build, update, release on GitHub Actions)"], { cwd: dir });
     run("git", ["push", "origin", `HEAD:${branch}`], { cwd: dir, inherit: true });
-    const make = makefile === "Makefile" ? "make" : "make -f forker.mk";
-    console.log(`done: ${forkRepo} (follows ${upstream}@${sourceBranch}, merges into ${branch})`);
-    console.log(`make: ${make} build | publish VERSION=vX | update | service-install`);
-    console.log(`next: generate forker/build.sh with the create-build skill`);
+    console.log(`done: ${forkRepo} (follows ${upstream}@${sourceBranch}, merges into ${branch}, daily at ${cron} UTC)`);
+    console.log(`next: write the build job in .github/workflows/forker-build.yml with the create-build skill`);
 }

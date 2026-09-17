@@ -37,6 +37,8 @@ fi
 if git merge --no-edit "refs/tags/$tag"; then
   git push origin "$FORK_BRANCH"
   echo "update: merged $tag"
+  # In GitHub Actions, tell the workflow which release to build.
+  if [[ -n "${GITHUB_OUTPUT:-}" ]]; then echo "merged=$tag" >> "$GITHUB_OUTPUT"; fi
   exit 0
 fi
 

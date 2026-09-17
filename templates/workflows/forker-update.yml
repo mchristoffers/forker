@@ -1,0 +1,47 @@
+# forker update: daily, merge the newest upstream release, then build and publish it.
+# Generic, the same for every fork.
+name: forker-update
+
+on:
+  schedule:
+    - cron: "{{CRON}}"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+concurrency: forker-update
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          # PAT with workflow scope: merges that touch upstream workflow files cannot be pushed with GITHUB_TOKEN.
+          token: ${{ secrets.FORKER_TOKEN }}
+      - name: Merge newest upstream release
+        id: update
+        env:
+          GH_TOKEN: ${{ secrets.FORKER_TOKEN }}
+        run: |
+          git config user.name "forker"
+          git config user.email "forker@users.noreply.github.com"
+          source forker/config
+          git remote add upstream "https://github.com/$UPSTREAM.git"
+          bash forker/update.sh
+      - name: Keep upstream workflows disabled
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash forker/workflows.sh disable-upstream
+      - name: Build and publish
+        if: steps.update.outputs.merged != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.update.outputs.merged }}
+        run: |
+          source forker/config
+          gh workflow run forker-build.yml --repo "$FORK" --ref "$FORK_BRANCH" -f version="$TAG-forker"

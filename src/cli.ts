@@ -4,8 +4,8 @@ import { fork } from "./fork.js";
 
 const USAGE = `usage: forker fork <owner/repo> [--dir <path>] [--source-branch <branch>]
 
-Forks <owner/repo> with gh, clones it and adds a Makefile with
-build, publish, update and service-* targets backed by forker/*.sh.
+Forks <owner/repo> with gh, clones it and adds GitHub Actions workflows that
+build and release the fork and merge new upstream releases daily.
 
 options:
   --dir            clone directory (default: repo name)

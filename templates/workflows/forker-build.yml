@@ -1,0 +1,64 @@
+# forker build: builds the fork on GitHub Actions and publishes a release on it.
+# The build job(s) are written per project by the create-build skill (fix with repair-build).
+#
+# Contract:
+#   - build jobs mirror the project's own CI release job (one comment line naming it)
+#   - each build job uploads only release artifacts (flat files) via actions/upload-artifact,
+#     with an artifact name starting with "dist-"; they become the release assets
+#   - every build job is listed in publish.needs
+#   - never edit upstream files; forker lives in forker/ and .github/workflows/forker-*.yml
+#   - everything below "generic" stays as is
+name: forker-build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release tag to create on the fork (empty = build only)
+        default: ""
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "forker-build.yml has not been generated yet: run the create-build skill" >&2
+          exit 1
+
+  # ---- generic ----
+  publish:
+    needs: [build]
+    if: inputs.version != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: dist-*
+          merge-multiple: true
+          path: dist
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          gh release create "$VERSION" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "$VERSION" --notes "Built by forker from $GITHUB_SHA: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+  report:
+    needs: [build, publish]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          title="forker: build failed${VERSION:+ for $VERSION}"
+          if gh issue list --repo "$GITHUB_REPOSITORY" --state open --json title --jq '.[].title' | grep -Fxq "$title"; then
+            exit 0
+          fi
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" \
+            --body "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID (commit $GITHUB_SHA). Fix it with the repair-build skill."

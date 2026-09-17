@@ -1,11 +1,11 @@
 # forker
 
-Fork a GitHub repo with `gh` and add a small layer on top: a `Makefile` with `build`, `publish` and `update`.
-The layer is the same for every repo. Only `forker/build.sh` is project-specific. The `create-build` skill has an AI agent write it (the `forker` skill calls it during setup), and `repair-build` fixes it after an upstream update.
+Fork a GitHub repo with `gh` and add a small layer on top that builds, releases and updates the fork on GitHub Actions (free for public repos, nothing runs locally).
+The layer is the same for every repo. Only the `build` job in `.github/workflows/forker-build.yml` is project-specific. The `create-build` skill has an AI agent write it (the `forker` skill calls it during setup), and `repair-build` fixes it after an upstream update.
 
 ## Install
 
-CLI (Node >= 20, plus `gh` (logged in), `git`, `make`):
+CLI (Node >= 20, plus `gh` (logged in, `workflow` scope) and `git`):
 
 ```sh
 npm install -g https://codeload.github.com/mchristoffers/forker/tar.gz/main   # from GitHub; not published to npm
@@ -31,13 +31,12 @@ Then ask your agent: *"set up a fork of owner/repo with forker"*. If the `forker
 forker fork owner/repo [--dir path] [--source-branch branch]
 ```
 
-This forks and clones the repo, then commits and pushes:
+This forks and clones the repo, enables Actions and issues on the fork, stores your gh token as the `FORKER_TOKEN` secret, disables upstream's own workflows, then commits and pushes:
 
-- `Makefile` (or `forker.mk` if upstream has one): `make build`, `make publish VERSION=v1.0.0`, `make update`, `make service-install`
-- `forker/build.sh`: a stub until the skill generates it. Writes artifacts to `forker/dist/` (gitignored)
-- `forker/publish.sh`: creates a GitHub release on the fork with `forker/dist/*`
-- `forker/update.sh`: merges the latest upstream release. On a conflict it opens an issue on the fork
-- `forker/service.sh`: `make service-install` / `service-status` / `service-uninstall` for a daily systemd user timer that runs `update`
-- `forker/config`: `UPSTREAM`, `UPSTREAM_BRANCH` (source branch to follow), `FORK`, `FORK_BRANCH`
+- `.github/workflows/forker-build.yml`: manual (`gh workflow run forker-build.yml [-f version=v1]`). The `build` job is a stub until the skill writes it; with a `version` it creates a release on the fork with the `dist-*` artifacts. A failure opens an issue
+- `.github/workflows/forker-update.yml`: daily and manual. Runs `forker/update.sh` (merges the latest upstream release, opens an issue on a conflict), then builds and releases `<tag>-forker`
+- `forker/update.sh`, `forker/workflows.sh` (keeps upstream workflows disabled), `forker/config`: `UPSTREAM`, `UPSTREAM_BRANCH` (source branch to follow), `FORK`, `FORK_BRANCH`
+
+`FORKER_TOKEN` is needed because `GITHUB_TOKEN` may not push merges that change upstream workflow files.
 
 See [docs/logic.md](docs/logic.md) and [docs/techstack.md](docs/techstack.md).

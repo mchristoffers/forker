@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "forker",
-  "version": "0.4.0",
-  "description": "Fork a GitHub repo with gh and add a generic build/publish/update layer; skills set up the fork and create or repair its build script.",
+  "version": "0.5.0",
+  "description": "Fork a GitHub repo with gh and build, release and update it on GitHub Actions; skills set up the fork and create or repair its build job.",
   "author": {
     "name": "Moritz Christoffers"
   },
