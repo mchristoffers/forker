@@ -1,7 +1,7 @@
 # forker
 
 Fork a GitHub repo with `gh` and add a small layer on top: a `Makefile` with `build`, `publish` and `update`.
-The layer is the same for every repo. Only `forker/build.sh` is project-specific, and the `forker` skill has an AI agent write it.
+The layer is the same for every repo. Only `forker/build.sh` is project-specific. The `create-or-repair-build` skill has an AI agent write it (or fix it after an upstream update), and the `forker` skill calls it during setup.
 
 ## Install
 

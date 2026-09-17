@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build this fork. Generated per project by the forker skill.
+# Build this fork. Generated per project by the create-or-repair-build skill.
 #
 # Contract:
 #   - runs non-interactively from any directory
@@ -11,5 +11,5 @@ cd "$(dirname "$0")/.."
 source forker/config
 
 echo "build: forker/build.sh has not been generated yet." >&2
-echo "build: run the forker skill (Claude Code or Codex) in this repo." >&2
+echo "build: run the create-or-repair-build skill in this repo." >&2
 exit 1
