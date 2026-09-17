@@ -11,16 +11,15 @@ CLI (Node >= 20, plus `gh` (logged in), `git`, `make`):
 npm install -g https://codeload.github.com/mchristoffers/forker/tar.gz/main   # from GitHub; not published to npm
 ```
 
-### Plugin / skill (Claude Code + Codex)
+### Plugin / skill (Claude Code)
 
 forker is a plugin in the `mchristoffers` marketplace ([mchristoffers/claude-marketplace](https://github.com/mchristoffers/claude-marketplace)):
 
 ```sh
 claude plugin marketplace add mchristoffers/claude-marketplace && claude plugin install forker@mchristoffers --scope user
-codex plugin marketplace add mchristoffers/claude-marketplace && codex plugin add forker@mchristoffers
 ```
 
-It's published in two formats that share `skills/`: root `plugin.json` ([Agent Plugins](https://agent-plugins.org), read by Codex) and
+It's published in two formats that share `skills/`: root `plugin.json` ([Agent Plugins](https://agent-plugins.org) open standard, so Codex and other clients can use it later) and
 `.claude-plugin/plugin.json` (Claude Code). When you change the skill, bump `version` in both manifests so installs pick up the change.
 `dist/` is committed, so installing the CLI from GitHub needs no build step. Run `npm run build` before committing changes to `src/`.
 
