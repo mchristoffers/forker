@@ -75,5 +75,5 @@ export function fork(opts: ForkOptions): void {
   const make = makefile === "Makefile" ? "make" : "make -f forker.mk";
   console.log(`done: ${forkRepo} (follows ${upstream}@${sourceBranch}, merges into ${branch})`);
   console.log(`make: ${make} build | publish VERSION=vX | update | service-install`);
-  console.log(`next: generate forker/build.sh with the create-or-repair-build skill`);
+  console.log(`next: generate forker/build.sh with the create-build skill`);
 }

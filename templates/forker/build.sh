@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build this fork. Written per project by the create-or-repair-build skill.
+# Build this fork. Written per project by the create-build skill (fix with repair-build).
 #
 # Contract:
 #   - non-interactive and idempotent: starts with rm -rf forker/dist && mkdir -p forker/dist
@@ -12,5 +12,5 @@ cd "$(dirname "$0")/.."
 source forker/config
 
 echo "build: forker/build.sh has not been generated yet." >&2
-echo "build: run the create-or-repair-build skill in this repo." >&2
+echo "build: run the create-build skill in this repo." >&2
 exit 1
