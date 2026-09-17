@@ -1,0 +1,7 @@
+# forker config, sourced by forker/*.sh
+UPSTREAM={{UPSTREAM}}
+# Source branch to follow: only releases whose tag is on this branch get merged.
+UPSTREAM_BRANCH={{UPSTREAM_BRANCH}}
+FORK={{FORK}}
+# Branch in the fork that releases get merged into.
+FORK_BRANCH={{FORK_BRANCH}}

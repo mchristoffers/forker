@@ -1,0 +1,17 @@
+{
+  "name": "forker",
+  "version": "0.1.0",
+  "description": "Fork a repo with gh and add a build/publish/update layer on top",
+  "type": "module",
+  "bin": { "forker": "dist/cli.js" },
+  "files": ["dist", "templates"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsc",
+    "prepare": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
