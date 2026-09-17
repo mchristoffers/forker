@@ -8,7 +8,7 @@ The layer is the same for every repo. Only `forker/build.sh` is project-specific
 CLI (Node >= 20, plus `gh` (logged in), `git`, `make`):
 
 ```sh
-npm install -g github:mchristoffers/forker
+npm install -g github:mchristoffers/forker   # from the private GitHub repo; not published to npm
 ```
 
 ### Plugin / skill (Claude Code + Codex)
@@ -26,6 +26,7 @@ npx skills add . --skill forker --global --agent codex --copy --yes             
 ```
 
 Rerun after changing the skill, and bump `version` in both manifests.
+`dist/` is committed, so installing from GitHub needs no build: run `npm run build` before committing changes to `src/`.
 Then ask your agent: *"set up a fork of owner/repo with forker"*.
 
 ## CLI

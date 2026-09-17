@@ -15,8 +15,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsc",
-    "prepare": "tsc"
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
